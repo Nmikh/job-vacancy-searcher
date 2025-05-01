@@ -8,8 +8,14 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 import org.springframework.data.mongodb.repository.MongoRepository
+import org.springframework.data.mongodb.repository.Query
+import org.springframework.data.mongodb.repository.Update
 import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 enum class VacancySource {
     DJINNI, DOU
@@ -32,18 +38,26 @@ data class JobVacancy(
     @Field(name = "additional_attributes")
     val additionalAttributes: Map<String, *>,
 
+    @Field(name = "date_posted")
+    val datePosted: LocalDateTime,
+
+    @Field(name = "date_scrapped")
+    val dateScrapped: LocalDateTime,
+
     @Field(name = "source")
     val source: VacancySource,
 
     @Field(name = "active")
     val active: Boolean
-
-
 )
 
 @Repository
 interface JobVacancyRepository : MongoRepository<JobVacancy, String> {
     fun findAllBySourceAndActive(source: VacancySource, active: Boolean): Collection<JobVacancy>
+
+    @Query("{ 'url' :  { \$in: ?0 } }")
+    @Update("{ '\$set' : { 'active' : ?1 } }")
+    fun updateActiveStatus(urls: List<String>, active: Boolean)
 }
 
 interface VacancyScrapper {
@@ -55,11 +69,17 @@ abstract class AbstractVacancyScrapper(
 ) : VacancyScrapper {
     override fun scrapeVacancies(parameters: Map<String, String>) {
         val existingUrls = jobVacancyRepository.findAllBySourceAndActive(getSource(), true).map { it.url }
-        val newVacancies = getVacancyLinks(parameters)
-            .filterNot { existingUrls.contains(it) }
+        val siteUrls = getVacancyLinks(parameters)
+
+        val newVacancies = siteUrls
+            .filterNot { it in existingUrls }
             .map { link -> getJobVacancy(link, parameters) }
 
         jobVacancyRepository.saveAll(newVacancies)
+
+        val outdatedVacancies = existingUrls.filterNot { it in siteUrls }
+        jobVacancyRepository.updateActiveStatus(outdatedVacancies, false)
+
     }
 
     protected abstract fun getVacancyLinks(parameters: Map<String, String>): List<String>
@@ -103,18 +123,22 @@ class DjinniScrapper(jobVacancyRepository: JobVacancyRepository) : AbstractVacan
 
     override fun getJobVacancy(url: String, parameters: Map<String, String>): JobVacancy {
         val document = Jsoup.connect(url).timeout(10 * 1000).get()
-
         val vacancy = document.selectFirst("script[type=application/ld+json]")?.html()
-
         val json = JSONObject(vacancy)
-        val description = json["description"].toString()
-        val title = json["title"].toString()
-        val company = (json["hiringOrganization"] as JSONObject)["name"].toString()
-
         val attributes = document.select("li.mb-1").mapNotNull { it.selectFirst("div.col")?.text() }
         val additionalAttributes = mapOf("attributes" to attributes)
 
-        return JobVacancy(url, company, title, description, additionalAttributes, getSource(), true)
+        return JobVacancy(
+            url = url,
+            company = (json["hiringOrganization"] as JSONObject)["name"].toString(),
+            title = json["title"].toString(),
+            description = json["description"].toString(),
+            additionalAttributes = additionalAttributes,
+            source = getSource(),
+            dateScrapped = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC),
+            datePosted = LocalDateTime.parse(json["datePosted"].toString(), DateTimeFormatter.ISO_DATE_TIME),
+            active = true
+        )
     }
 
     override fun getSource(): VacancySource = VacancySource.DJINNI
