@@ -4,10 +4,14 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 import java.time.LocalDateTime
+import java.util.UUID
 
-@Document("job-vacancy")
-data class JobVacancy(
+@Document("vacancies")
+data class Vacancy(
     @Id
+    val id: UUID,
+
+    @Field(name = "url")
     val url: String,
 
     @Field(name = "company_name")

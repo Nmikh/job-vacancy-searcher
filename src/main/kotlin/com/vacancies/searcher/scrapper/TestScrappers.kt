@@ -1,12 +1,13 @@
 package com.vacancies.searcher.scrapper
 
-import com.vacancies.searcher.model.JobVacancy
+import com.vacancies.searcher.model.Vacancy
 import com.vacancies.searcher.model.VacancySource
-import com.vacancies.searcher.repository.JobVacancyRepository
+import com.vacancies.searcher.repository.VacancyRepository
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 import java.lang.Thread.sleep
 import java.time.LocalDateTime
+import java.util.*
 
 @Service
 @ConditionalOnProperty(
@@ -14,9 +15,9 @@ import java.time.LocalDateTime
     havingValue = "true",
     matchIfMissing = false
 )
-class TestScrapper1(jobVacancyRepository: JobVacancyRepository) : AbstractVacancyScrapper(jobVacancyRepository) {
+class TestScrapper1(vacancyRepository: VacancyRepository) : AbstractVacancyScrapper(vacancyRepository) {
     override fun getVacancyLinks(parameters: Map<String, String>): List<String> {
-        sleep(30000)
+        sleep(300)
 
         return listOf(
             "https://example.com/testScrapper1/job1",
@@ -24,10 +25,11 @@ class TestScrapper1(jobVacancyRepository: JobVacancyRepository) : AbstractVacanc
         )
     }
 
-    override fun getJobVacancy(url: String, parameters: Map<String, String>): JobVacancy {
-        sleep(30000)
+    override fun getVacancy(url: String, parameters: Map<String, String>): Vacancy {
+        sleep(300)
 
-        return JobVacancy(
+        return Vacancy(
+            id = UUID.randomUUID(),
             url = url,
             company = "Test Scrapper1",
             title = "Senior Java Developer",
@@ -50,9 +52,9 @@ class TestScrapper1(jobVacancyRepository: JobVacancyRepository) : AbstractVacanc
     havingValue = "true",
     matchIfMissing = false
 )
-class TestScrapper2(jobVacancyRepository: JobVacancyRepository) : AbstractVacancyScrapper(jobVacancyRepository) {
+class TestScrapper2(vacancyRepository: VacancyRepository) : AbstractVacancyScrapper(vacancyRepository) {
     override fun getVacancyLinks(parameters: Map<String, String>): List<String> {
-        sleep(30000)
+        sleep(300)
 
         return listOf(
             "https://example.com/testScrapper2/job1",
@@ -60,10 +62,11 @@ class TestScrapper2(jobVacancyRepository: JobVacancyRepository) : AbstractVacanc
         )
     }
 
-    override fun getJobVacancy(url: String, parameters: Map<String, String>): JobVacancy {
-        sleep(30000)
+    override fun getVacancy(url: String, parameters: Map<String, String>): Vacancy {
+        sleep(300)
 
-        return JobVacancy(
+        return Vacancy(
+            id = UUID.randomUUID(),
             url = url,
             company = "Test Scrapper2",
             title = "Senior Java Developer",

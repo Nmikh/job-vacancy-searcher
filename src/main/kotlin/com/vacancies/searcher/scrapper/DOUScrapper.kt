@@ -1,8 +1,8 @@
 package com.vacancies.searcher.scrapper
 
-import com.vacancies.searcher.model.JobVacancy
+import com.vacancies.searcher.model.Vacancy
 import com.vacancies.searcher.model.VacancySource
-import com.vacancies.searcher.repository.JobVacancyRepository
+import com.vacancies.searcher.repository.VacancyRepository
 import org.jsoup.Jsoup
 import org.openqa.selenium.By
 import org.openqa.selenium.WebDriver
@@ -18,7 +18,7 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import java.util.Locale
+import java.util.*
 
 @Service
 @ConditionalOnProperty(
@@ -26,7 +26,7 @@ import java.util.Locale
     havingValue = "true",
     matchIfMissing = false
 )
-class DOUScrapper(jobVacancyRepository: JobVacancyRepository) : AbstractVacancyScrapper(jobVacancyRepository) {
+class DOUScrapper(vacancyRepository: VacancyRepository) : AbstractVacancyScrapper(vacancyRepository) {
     companion object {
         private const val BASE_URL = "https://jobs.dou.ua"
         private const val JOB_SEARCH_URL =
@@ -62,7 +62,7 @@ class DOUScrapper(jobVacancyRepository: JobVacancyRepository) : AbstractVacancyS
     private fun extractVacancyLinks(driver: WebDriver): List<String> =
         driver.findElements(By.cssSelector("a.vt")).mapNotNull { it.getAttribute("href") }
 
-    override fun getJobVacancy(url: String, parameters: Map<String, String>): JobVacancy {
+    override fun getVacancy(url: String, parameters: Map<String, String>): Vacancy {
         sleep(30000)
 
         val document = Jsoup.connect(url).timeout(10 * 1000).get()
@@ -74,7 +74,8 @@ class DOUScrapper(jobVacancyRepository: JobVacancyRepository) : AbstractVacancyS
         val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.forLanguageTag("uk"))
         val datePosted = LocalDate.parse(ukDate, formatter)
 
-        return JobVacancy(
+        return Vacancy(
+            id = UUID.randomUUID(),
             url = url,
             company = company,
             title = document.title(),

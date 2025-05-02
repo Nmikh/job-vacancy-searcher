@@ -13,18 +13,29 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class TestController(
     private val scrappers: List<VacancyScrapper>,
-    private val jobVacancyRepository: JobVacancyRepository
+    private val vacancyRepository: VacancyRepository
 ) {
 
     @PostMapping("/start")
-    fun startScrape(@RequestBody parameters: Map<String, String>): ResponseEntity<String> {
-        scrappers.forEach { scrapper -> scrapper.scrapeVacancies(parameters) }
-        return ResponseEntity.ok("started");
+    fun startScrape(@RequestBody parameters: Map<String, String>): ResponseEntity<List<ScrapperJobResult>> {
+        val jobResults = scrappers.map { scrapper -> scrapper.scrapeVacancies(parameters) }
+        return ResponseEntity.ok(jobResults);
     }
 
     @GetMapping("/jobs")
-    fun getAll(): List<JobVacancy> = jobVacancyRepository.findAll()
+    fun getAll(): List<Vacancy> = vacancyRepository.findAll()
 
     @DeleteMapping("/jobs")
-    fun deleteAll() = jobVacancyRepository.deleteAll()
+    fun deleteAll() = vacancyRepository.deleteAll()
+
+//    @GetMapping("/create")
+//    fun addTests() {
+//        val jobVacancy =
+//            JobVacancy("url1", "company1", "title1", "description1", mapOf("1" to "1"), VacancySource.DJINNI, true)
+//        val jobVacancy2 =
+//            JobVacancy("url2", "company2", "title2", "description2", mapOf("2" to "2"), VacancySource.DJINNI, true)
+//
+//        jobVacancyRepository.save(jobVacancy);
+//        jobVacancyRepository.save(jobVacancy2);
+//    }
 }

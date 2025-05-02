@@ -1,35 +1,55 @@
 package com.vacancies.searcher.scrapper
 
-import com.vacancies.searcher.model.JobVacancy
+import com.vacancies.searcher.model.ScrapperJobResult
+import com.vacancies.searcher.model.Vacancy
 import com.vacancies.searcher.model.VacancySource
-import com.vacancies.searcher.repository.JobVacancyRepository
+import com.vacancies.searcher.repository.VacancyRepository
+import java.time.Duration
+import java.time.Instant
 
 
 interface VacancyScrapper {
-    fun scrapeVacancies(parameters: Map<String, String>)
+    fun scrapeVacancies(parameters: Map<String, String>): ScrapperJobResult
 }
 
 abstract class AbstractVacancyScrapper(
-    private val jobVacancyRepository: JobVacancyRepository
+    private val vacancyRepository: VacancyRepository
 ) : VacancyScrapper {
-    override fun scrapeVacancies(parameters: Map<String, String>) {
-        val existingUrls = jobVacancyRepository.findAllBySourceAndActive(getSource(), true).map { it.url }
-        val siteUrls = getVacancyLinks(parameters)
+    override fun scrapeVacancies(parameters: Map<String, String>): ScrapperJobResult {
+        val startTime = Instant.now()
+        val source = getSource()
 
-        val newVacancies = siteUrls
-            .filterNot { it in existingUrls }
-            .map { link -> getJobVacancy(link, parameters) }
+        return runCatching {
+            val existingUrls = vacancyRepository.findAllBySourceAndActive(getSource(), true).map { it.url }
+            val siteUrls = getVacancyLinks(parameters)
 
-        jobVacancyRepository.saveAll(newVacancies)
+            val newVacancies = siteUrls
+                .filterNot { it in existingUrls }
+                .map { link -> getVacancy(link, parameters) }
 
-        val outdatedVacancies = existingUrls.filterNot { it in siteUrls }
-        jobVacancyRepository.updateActiveStatus(outdatedVacancies, false)
+            vacancyRepository.saveAll(newVacancies)
 
+            val outdatedVacanciesUrls = existingUrls.filterNot { it in siteUrls }
+            vacancyRepository.updateActiveStatus(outdatedVacanciesUrls, false)
+
+            ScrapperJobResult.Success(
+                source = source,
+                newVacanciesAmount = newVacancies.size,
+                deactivatedVacanciesAmount = outdatedVacanciesUrls.size,
+                duration = Duration.between(startTime, Instant.now())
+            )
+        }.getOrElse { ex ->
+            ScrapperJobResult.Failure(
+                source = source,
+                exception = ex,
+                duration = Duration.between(startTime, Instant.now())
+            )
+        }
     }
 
     protected abstract fun getVacancyLinks(parameters: Map<String, String>): List<String>
 
-    protected abstract fun getJobVacancy(url: String, parameters: Map<String, String>): JobVacancy
+    protected abstract fun getVacancy(url: String, parameters: Map<String, String>): Vacancy
 
     protected abstract fun getSource(): VacancySource
 }

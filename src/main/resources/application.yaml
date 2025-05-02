@@ -1,11 +1,11 @@
 spring:
   application:
-    name: job-searcher
+    name: vacancies-searcher-server
   data:
     mongodb:
       host: localhost
       port: 27017
-      database: jobs
+      database: vacancies
 scrapper:
   providers:
     dou: false

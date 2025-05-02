@@ -1,8 +1,8 @@
 package com.vacancies.searcher.scrapper
 
-import com.vacancies.searcher.model.JobVacancy
+import com.vacancies.searcher.model.Vacancy
 import com.vacancies.searcher.model.VacancySource
-import com.vacancies.searcher.repository.JobVacancyRepository
+import com.vacancies.searcher.repository.VacancyRepository
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
@@ -14,6 +14,7 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 
 @Service
@@ -22,7 +23,7 @@ import java.time.format.DateTimeFormatter
     havingValue = "true",
     matchIfMissing = false
 )
-class DjinniScrapper(jobVacancyRepository: JobVacancyRepository) : AbstractVacancyScrapper(jobVacancyRepository) {
+class DjinniScrapper(vacancyRepository: VacancyRepository) : AbstractVacancyScrapper(vacancyRepository) {
     companion object {
         private const val BASE_URL = "https://djinni.co"
         private const val JOB_SEARCH_URL =
@@ -55,7 +56,7 @@ class DjinniScrapper(jobVacancyRepository: JobVacancyRepository) : AbstractVacan
     }
 
 
-    override fun getJobVacancy(url: String, parameters: Map<String, String>): JobVacancy {
+    override fun getVacancy(url: String, parameters: Map<String, String>): Vacancy {
         sleep(30000)
 
         val document = Jsoup.connect(url).timeout(10 * 1000).header("Cookie", parameters["session_cookie"]).get()
@@ -64,7 +65,8 @@ class DjinniScrapper(jobVacancyRepository: JobVacancyRepository) : AbstractVacan
         val attributes = document.select("li.mb-1").mapNotNull { it.selectFirst("div.col")?.text() }
         val additionalAttributes = mapOf("attributes" to attributes)
 
-        return JobVacancy(
+        return Vacancy(
+            id = UUID.randomUUID(),
             url = url,
             company = (json["hiringOrganization"] as JSONObject)["name"].toString(),
             title = json["title"].toString(),
