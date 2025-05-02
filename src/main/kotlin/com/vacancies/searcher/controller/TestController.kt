@@ -1,7 +1,7 @@
 package com.vacancies.searcher.controller
 
-import com.vacancies.searcher.scrapper.JobVacancy
-import com.vacancies.searcher.scrapper.JobVacancyRepository
+import com.vacancies.searcher.model.JobVacancy
+import com.vacancies.searcher.repository.JobVacancyRepository
 import com.vacancies.searcher.scrapper.VacancyScrapper
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping

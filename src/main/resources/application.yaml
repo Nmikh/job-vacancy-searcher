@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: job-searcher
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: jobs
+scrapper:
+  providers:
+    dou: false
+    djinni: false
+    testScrapper1: true
+    testScrapper2: true
