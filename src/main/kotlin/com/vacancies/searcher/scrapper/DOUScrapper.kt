@@ -2,6 +2,8 @@ package com.vacancies.searcher.scrapper
 
 import com.vacancies.searcher.model.Vacancy
 import com.vacancies.searcher.model.VacancySource
+import com.vacancies.searcher.model.VacancyTags
+import com.vacancies.searcher.repository.CompanyRepository
 import com.vacancies.searcher.repository.VacancyRepository
 import org.jsoup.Jsoup
 import org.openqa.selenium.By
@@ -26,7 +28,10 @@ import java.util.*
     havingValue = "true",
     matchIfMissing = false
 )
-class DOUScrapper(vacancyRepository: VacancyRepository) : AbstractVacancyScrapper(vacancyRepository) {
+class DOUScrapper(
+    vacancyRepository: VacancyRepository,
+    companyRepository: CompanyRepository
+) : AbstractVacancyScrapper(vacancyRepository, companyRepository) {
     companion object {
         private const val BASE_URL = "https://jobs.dou.ua"
         private const val JOB_SEARCH_URL =
@@ -77,13 +82,14 @@ class DOUScrapper(vacancyRepository: VacancyRepository) : AbstractVacancyScrappe
         return Vacancy(
             id = UUID.randomUUID(),
             url = url,
-            company = company,
+            companyName = company,
             title = document.title(),
             description = description,
             datePosted = datePosted.atStartOfDay(),
             dateScrapped = LocalDateTime.now(ZoneOffset.UTC),
             source = VacancySource.DOU,
-            active = true
+            active = true,
+            tags = listOf(VacancyTags.NEW)
         )
     }
 

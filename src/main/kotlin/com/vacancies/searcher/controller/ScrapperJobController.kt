@@ -1,8 +1,12 @@
 package com.vacancies.searcher.controller
 
-import com.vacancies.searcher.model.JobVacancy
-import com.vacancies.searcher.repository.JobVacancyRepository
+import com.vacancies.searcher.model.ScrapperJobResult
+import com.vacancies.searcher.model.ScrappingRequest
+import com.vacancies.searcher.model.Vacancy
+import com.vacancies.searcher.repository.CompanyRepository
+import com.vacancies.searcher.repository.VacancyRepository
 import com.vacancies.searcher.scrapper.VacancyScrapper
+import com.vacancies.searcher.service.VacancyService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -10,15 +14,16 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
-@RestController
-class TestController(
+@RestController("/api/v1/scrapper/job")
+class ScrapperJobController(
     private val scrappers: List<VacancyScrapper>,
-    private val vacancyRepository: VacancyRepository
+    private val vacancyRepository: VacancyRepository,
+    private val vacancyService: VacancyService
 ) {
 
     @PostMapping("/start")
-    fun startScrape(@RequestBody parameters: Map<String, String>): ResponseEntity<List<ScrapperJobResult>> {
-        val jobResults = scrappers.map { scrapper -> scrapper.scrapeVacancies(parameters) }
+    fun startScrape(@RequestBody request: ScrappingRequest): ResponseEntity<List<ScrapperJobResult>> {
+        val jobResults = vacancyService.startScrapping(request)
         return ResponseEntity.ok(jobResults);
     }
 

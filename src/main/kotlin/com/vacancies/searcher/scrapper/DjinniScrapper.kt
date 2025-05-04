@@ -2,6 +2,8 @@ package com.vacancies.searcher.scrapper
 
 import com.vacancies.searcher.model.Vacancy
 import com.vacancies.searcher.model.VacancySource
+import com.vacancies.searcher.model.VacancyTags
+import com.vacancies.searcher.repository.CompanyRepository
 import com.vacancies.searcher.repository.VacancyRepository
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -23,7 +25,10 @@ import java.util.*
     havingValue = "true",
     matchIfMissing = false
 )
-class DjinniScrapper(vacancyRepository: VacancyRepository) : AbstractVacancyScrapper(vacancyRepository) {
+class DjinniScrapper(
+    vacancyRepository: VacancyRepository,
+    companyRepository: CompanyRepository
+) : AbstractVacancyScrapper(vacancyRepository, companyRepository) {
     companion object {
         private const val BASE_URL = "https://djinni.co"
         private const val JOB_SEARCH_URL =
@@ -68,14 +73,15 @@ class DjinniScrapper(vacancyRepository: VacancyRepository) : AbstractVacancyScra
         return Vacancy(
             id = UUID.randomUUID(),
             url = url,
-            company = (json["hiringOrganization"] as JSONObject)["name"].toString(),
+            companyName = (json["hiringOrganization"] as JSONObject)["name"].toString(),
             title = json["title"].toString(),
             description = json["description"].toString(),
             additionalAttributes = additionalAttributes,
             source = getSource(),
             dateScrapped = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC),
             datePosted = LocalDateTime.parse(json["datePosted"].toString(), DateTimeFormatter.ISO_DATE_TIME),
-            active = true
+            active = true,
+            tags = listOf(VacancyTags.NEW)
         )
     }
 

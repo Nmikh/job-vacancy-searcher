@@ -2,6 +2,8 @@ package com.vacancies.searcher.scrapper
 
 import com.vacancies.searcher.model.Vacancy
 import com.vacancies.searcher.model.VacancySource
+import com.vacancies.searcher.model.VacancyTags
+import com.vacancies.searcher.repository.CompanyRepository
 import com.vacancies.searcher.repository.VacancyRepository
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
@@ -15,7 +17,10 @@ import java.util.*
     havingValue = "true",
     matchIfMissing = false
 )
-class TestScrapper1(vacancyRepository: VacancyRepository) : AbstractVacancyScrapper(vacancyRepository) {
+class TestScrapper1(
+    vacancyRepository: VacancyRepository,
+    companyRepository: CompanyRepository
+) : AbstractVacancyScrapper(vacancyRepository, companyRepository) {
     override fun getVacancyLinks(parameters: Map<String, String>): List<String> {
         sleep(300)
 
@@ -31,19 +36,19 @@ class TestScrapper1(vacancyRepository: VacancyRepository) : AbstractVacancyScrap
         return Vacancy(
             id = UUID.randomUUID(),
             url = url,
-            company = "Test Scrapper1",
+            companyName = "Test Scrapper1",
             title = "Senior Java Developer",
             description = "This is a test job description for $url.",
             additionalAttributes = mapOf("location" to "Remote", "level" to "Senior"),
             datePosted = LocalDateTime.now().minusDays(5),
             dateScrapped = LocalDateTime.now(),
             source = getSource(),
-            active = true
+            active = true,
+            tags = listOf(VacancyTags.NEW)
         )
     }
 
     override fun getSource(): VacancySource = VacancySource.TEST_SCRAPPER_1
-
 }
 
 @Service
@@ -52,7 +57,10 @@ class TestScrapper1(vacancyRepository: VacancyRepository) : AbstractVacancyScrap
     havingValue = "true",
     matchIfMissing = false
 )
-class TestScrapper2(vacancyRepository: VacancyRepository) : AbstractVacancyScrapper(vacancyRepository) {
+class TestScrapper2(
+    vacancyRepository: VacancyRepository,
+    companyRepository: CompanyRepository
+) : AbstractVacancyScrapper(vacancyRepository, companyRepository) {
     override fun getVacancyLinks(parameters: Map<String, String>): List<String> {
         sleep(300)
 
@@ -68,14 +76,15 @@ class TestScrapper2(vacancyRepository: VacancyRepository) : AbstractVacancyScrap
         return Vacancy(
             id = UUID.randomUUID(),
             url = url,
-            company = "Test Scrapper2",
+            companyName = "Test Scrapper2",
             title = "Senior Java Developer",
             description = "This is a test job description for $url.",
             additionalAttributes = mapOf("location" to "Remote", "level" to "Senior"),
             datePosted = LocalDateTime.now().minusDays(5),
             dateScrapped = LocalDateTime.now(),
             source = getSource(),
-            active = true
+            active = true,
+            tags = listOf(VacancyTags.NEW)
         )
     }
 

@@ -1,10 +1,11 @@
 package com.vacancies.searcher.model
 
 import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 @Document("vacancies")
 data class Vacancy(
@@ -15,7 +16,10 @@ data class Vacancy(
     val url: String,
 
     @Field(name = "company_name")
-    val company: String,
+    val companyName: String,
+
+    @DBRef
+    var company: Company? = null,
 
     @Field(name = "vacancy_title")
     val title: String,
@@ -36,7 +40,10 @@ data class Vacancy(
     val source: VacancySource,
 
     @Field(name = "active")
-    val active: Boolean
+    val active: Boolean,
+
+    @Field(name = "tags")
+    val tags: List<VacancyTags>
 )
 
 enum class VacancySource {
@@ -44,4 +51,8 @@ enum class VacancySource {
     DOU,
     TEST_SCRAPPER_1,
     TEST_SCRAPPER_2
+}
+
+enum class VacancyTags {
+    NEW, NOT_INTERESTED, STARED
 }
