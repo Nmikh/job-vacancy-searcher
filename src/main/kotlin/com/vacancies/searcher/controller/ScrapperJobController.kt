@@ -1,46 +1,33 @@
 package com.vacancies.searcher.controller
 
-import com.vacancies.searcher.model.ScrapperJobResult
-import com.vacancies.searcher.model.ScrappingRequest
-import com.vacancies.searcher.model.Vacancy
-import com.vacancies.searcher.repository.CompanyRepository
-import com.vacancies.searcher.repository.VacancyRepository
-import com.vacancies.searcher.scrapper.VacancyScrapper
+import com.vacancies.searcher.model.ScraperJob
+import com.vacancies.searcher.model.ScrapingRequest
 import com.vacancies.searcher.service.VacancyService
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.util.*
 
-@RestController("/api/v1/scrapper/job")
+@RestController
+@RequestMapping("/api/v1/scrapper/job")
 class ScrapperJobController(
-    private val scrappers: List<VacancyScrapper>,
-    private val vacancyRepository: VacancyRepository,
     private val vacancyService: VacancyService
 ) {
+    @PostMapping("start")
+    fun startScrape(@RequestBody request: ScrapingRequest): ResponseEntity<UUID> {
+        val jobId = UUID.randomUUID()
+        vacancyService.startScrapping(request, jobId)
 
-    @PostMapping("/start")
-    fun startScrape(@RequestBody request: ScrappingRequest): ResponseEntity<List<ScrapperJobResult>> {
-        val jobResults = vacancyService.startScrapping(request)
-        return ResponseEntity.ok(jobResults);
+        return ResponseEntity.ok(jobId);
     }
 
-    @GetMapping("/jobs")
-    fun getAll(): List<Vacancy> = vacancyRepository.findAll()
-
-    @DeleteMapping("/jobs")
-    fun deleteAll() = vacancyRepository.deleteAll()
-
-//    @GetMapping("/create")
-//    fun addTests() {
-//        val jobVacancy =
-//            JobVacancy("url1", "company1", "title1", "description1", mapOf("1" to "1"), VacancySource.DJINNI, true)
-//        val jobVacancy2 =
-//            JobVacancy("url2", "company2", "title2", "description2", mapOf("2" to "2"), VacancySource.DJINNI, true)
-//
-//        jobVacancyRepository.save(jobVacancy);
-//        jobVacancyRepository.save(jobVacancy2);
-//    }
+    @GetMapping("{jobId}")
+    fun jobStatus(@PathVariable jobId: UUID): ResponseEntity<ScraperJob> =
+        vacancyService.getScrappingStatus(jobId)
+            .map { ResponseEntity.ok(it) }
+            .orElse(ResponseEntity.notFound().build())
 }

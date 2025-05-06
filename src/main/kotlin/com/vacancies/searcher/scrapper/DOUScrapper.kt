@@ -2,7 +2,7 @@ package com.vacancies.searcher.scrapper
 
 import com.vacancies.searcher.model.Vacancy
 import com.vacancies.searcher.model.VacancySource
-import com.vacancies.searcher.model.VacancyTags
+import com.vacancies.searcher.model.VacancyTag
 import com.vacancies.searcher.repository.CompanyRepository
 import com.vacancies.searcher.repository.VacancyRepository
 import org.jsoup.Jsoup
@@ -68,7 +68,7 @@ class DOUScrapper(
         driver.findElements(By.cssSelector("a.vt")).mapNotNull { it.getAttribute("href") }
 
     override fun getVacancy(url: String, parameters: Map<String, String>): Vacancy {
-        sleep(30000)
+        sleep(SLEEP_TIME)
 
         val document = Jsoup.connect(url).timeout(10 * 1000).get()
         val company = document.select(".l-n a").firstOrNull()?.text()?.trim().toString()
@@ -89,7 +89,7 @@ class DOUScrapper(
             dateScrapped = LocalDateTime.now(ZoneOffset.UTC),
             source = VacancySource.DOU,
             active = true,
-            tags = listOf(VacancyTags.NEW)
+            tag = VacancyTag.NEW
         )
     }
 

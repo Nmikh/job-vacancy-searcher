@@ -1,7 +1,6 @@
 package com.vacancies.searcher.model
 
 import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 import java.time.LocalDateTime
@@ -18,8 +17,7 @@ data class Vacancy(
     @Field(name = "company_name")
     val companyName: String,
 
-    @DBRef
-    var company: Company? = null,
+    var companyId: UUID? = null,
 
     @Field(name = "vacancy_title")
     val title: String,
@@ -28,7 +26,7 @@ data class Vacancy(
     val description: String,
 
     @Field(name = "additional_attributes")
-    val additionalAttributes: Map<String, *> = emptyMap<String, Any?>(),
+    val additionalAttributes: Map<String, Any?> = emptyMap(),
 
     @Field(name = "date_posted")
     val datePosted: LocalDateTime,
@@ -42,8 +40,15 @@ data class Vacancy(
     @Field(name = "active")
     val active: Boolean,
 
-    @Field(name = "tags")
-    val tags: List<VacancyTags>
+    @Field(name = "tag")
+    var tag: VacancyTag
+)
+
+data class VacancyPreview(
+    val id: UUID,
+    val url: String,
+    val companyName: String,
+    val title: String
 )
 
 enum class VacancySource {
@@ -53,6 +58,6 @@ enum class VacancySource {
     TEST_SCRAPPER_2
 }
 
-enum class VacancyTags {
-    NEW, NOT_INTERESTED, STARED
+enum class VacancyTag {
+    NEW, NOT_INTERESTED, STARED, APPLIED
 }

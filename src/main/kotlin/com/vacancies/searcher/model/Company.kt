@@ -14,5 +14,10 @@ data class Company(
     val name: String,
 
     @Field(name = "alternative_names")
-    val alternativeNames: List<String>
+    var alternativeNames: MutableSet<String> = mutableSetOf()
+)
+
+data class CompanyDTO(
+    val name: String,
+    var alternativeNames: MutableSet<String> = mutableSetOf()
 )

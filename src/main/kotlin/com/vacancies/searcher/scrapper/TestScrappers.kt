@@ -2,7 +2,7 @@ package com.vacancies.searcher.scrapper
 
 import com.vacancies.searcher.model.Vacancy
 import com.vacancies.searcher.model.VacancySource
-import com.vacancies.searcher.model.VacancyTags
+import com.vacancies.searcher.model.VacancyTag
 import com.vacancies.searcher.repository.CompanyRepository
 import com.vacancies.searcher.repository.VacancyRepository
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -44,7 +44,7 @@ class TestScrapper1(
             dateScrapped = LocalDateTime.now(),
             source = getSource(),
             active = true,
-            tags = listOf(VacancyTags.NEW)
+            tag = VacancyTag.NEW
         )
     }
 
@@ -84,7 +84,7 @@ class TestScrapper2(
             dateScrapped = LocalDateTime.now(),
             source = getSource(),
             active = true,
-            tags = listOf(VacancyTags.NEW)
+            tag = VacancyTag.NEW
         )
     }
 

@@ -2,7 +2,7 @@ package com.vacancies.searcher.scrapper
 
 import com.vacancies.searcher.model.Vacancy
 import com.vacancies.searcher.model.VacancySource
-import com.vacancies.searcher.model.VacancyTags
+import com.vacancies.searcher.model.VacancyTag
 import com.vacancies.searcher.repository.CompanyRepository
 import com.vacancies.searcher.repository.VacancyRepository
 import okhttp3.OkHttpClient
@@ -50,7 +50,7 @@ class DjinniScrapper(
                 val body = response.body?.string()
                 if (response.code != 200 || body == null) return@mapNotNull emptyList()
 
-                sleep(30000)
+                sleep(SLEEP_TIME)
 
                 return@mapNotNull Jsoup.parse(body).select("a.job-item__title-link")
                     .map { BASE_URL + it.attr("href") }
@@ -62,7 +62,7 @@ class DjinniScrapper(
 
 
     override fun getVacancy(url: String, parameters: Map<String, String>): Vacancy {
-        sleep(30000)
+        sleep(SLEEP_TIME)
 
         val document = Jsoup.connect(url).timeout(10 * 1000).header("Cookie", parameters["session_cookie"]).get()
         val vacancy = document.selectFirst("script[type=application/ld+json]")?.html()
@@ -81,7 +81,7 @@ class DjinniScrapper(
             dateScrapped = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC),
             datePosted = LocalDateTime.parse(json["datePosted"].toString(), DateTimeFormatter.ISO_DATE_TIME),
             active = true,
-            tags = listOf(VacancyTags.NEW)
+            tag = VacancyTag.NEW
         )
     }
 

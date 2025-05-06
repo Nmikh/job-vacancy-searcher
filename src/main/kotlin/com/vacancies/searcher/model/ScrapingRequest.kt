@@ -1,10 +1,10 @@
 package com.vacancies.searcher.model
 
-data class ScrappingRequest(
-    val inputs: List<ScrapperInput>,
+data class ScrapingRequest(
+    val inputs: List<ScraperInput>,
 )
 
-data class ScrapperInput(
+data class ScraperInput(
     val source: VacancySource,
     val parameters: Map<String, String> = emptyMap()
 )

@@ -1,6 +1,7 @@
 package com.vacancies.searcher.scrapper
 
-import com.vacancies.searcher.model.ScrapperJobResult
+import com.vacancies.searcher.model.ScraperJobResult
+import com.vacancies.searcher.model.ScraperJobResultStatus
 import com.vacancies.searcher.model.Vacancy
 import com.vacancies.searcher.model.VacancySource
 import com.vacancies.searcher.repository.CompanyRepository
@@ -10,7 +11,7 @@ import java.time.Instant
 
 
 interface VacancyScrapper {
-    fun scrapeVacancies(parameters: Map<String, String>): ScrapperJobResult
+    fun scrapeVacancies(parameters: Map<String, String>): ScraperJobResult
 
     fun getSource(): VacancySource
 }
@@ -19,7 +20,12 @@ abstract class AbstractVacancyScrapper(
     private val vacancyRepository: VacancyRepository,
     private val companyRepository: CompanyRepository
 ) : VacancyScrapper {
-    override fun scrapeVacancies(parameters: Map<String, String>): ScrapperJobResult {
+
+    companion object {
+        const val SLEEP_TIME = 30000L
+    }
+
+    override fun scrapeVacancies(parameters: Map<String, String>): ScraperJobResult {
         val startTime = Instant.now()
         val source = getSource()
 
@@ -37,16 +43,19 @@ abstract class AbstractVacancyScrapper(
             val outdatedVacanciesUrls = existingUrls.filterNot { it in siteUrls }
             vacancyRepository.updateActiveStatus(outdatedVacanciesUrls, false)
 
-            ScrapperJobResult.Success(
+            ScraperJobResult(
+                status = ScraperJobResultStatus.SUCCESS,
                 source = source,
                 newVacanciesAmount = newVacancies.size,
                 deactivatedVacanciesAmount = outdatedVacanciesUrls.size,
                 duration = Duration.between(startTime, Instant.now())
             )
         }.getOrElse { ex ->
-            ScrapperJobResult.Failure(
+            ScraperJobResult(
+                status = ScraperJobResultStatus.FAILURE,
                 source = source,
-                exception = ex,
+                cause = ex.cause.toString(),
+                stackTrace = ex.stackTrace.joinToString("\n") { it.toString() },
                 duration = Duration.between(startTime, Instant.now())
             )
         }
@@ -54,8 +63,8 @@ abstract class AbstractVacancyScrapper(
 
     private fun setUpCompany(vacancy: Vacancy): Vacancy {
         companyRepository
-            .findOneByAlternativeNamesContaining(vacancy.companyName)
-            ?.let { vacancy.company = it }
+            .findOneByAlternativeNamesIn(vacancy.companyName)
+            ?.let { vacancy.companyId = it.id }
 
         return vacancy
     }
