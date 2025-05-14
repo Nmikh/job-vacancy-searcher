@@ -2,6 +2,8 @@ package com.vacancies.searcher.controller
 
 import com.vacancies.searcher.model.ScraperJob
 import com.vacancies.searcher.model.ScrapingRequest
+import com.vacancies.searcher.model.ScrapperConfig
+import com.vacancies.searcher.service.ScrapperJobConfigService
 import com.vacancies.searcher.service.VacancyService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -15,14 +17,15 @@ import java.util.*
 @RestController
 @RequestMapping("/api/v1/scrapper/job")
 class ScrapperJobController(
-    private val vacancyService: VacancyService
+    private val vacancyService: VacancyService,
+    private val scrapperJobConfigService: ScrapperJobConfigService
 ) {
     @PostMapping("start")
     fun startScrape(@RequestBody request: ScrapingRequest): ResponseEntity<UUID> {
         val jobId = UUID.randomUUID()
         vacancyService.startScrapping(request, jobId)
 
-        return ResponseEntity.ok(jobId);
+        return ResponseEntity.ok(jobId)
     }
 
     @GetMapping("{jobId}")
@@ -30,4 +33,9 @@ class ScrapperJobController(
         vacancyService.getScrappingStatus(jobId)
             .map { ResponseEntity.ok(it) }
             .orElse(ResponseEntity.notFound().build())
+
+    @GetMapping("configurations")
+    fun getConfigurations(): ResponseEntity<ScrapperConfig> =
+        ResponseEntity.ok(scrapperJobConfigService.getConfigurations())
+
 }
