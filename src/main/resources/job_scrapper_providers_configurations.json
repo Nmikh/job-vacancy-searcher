@@ -17,7 +17,8 @@
             { "value": "7", "label": "7 years" }
           ],
           "multiple": false,
-          "required": true
+          "required": true,
+          "stored": true
         },
         {
           "name": "technology",
@@ -28,7 +29,8 @@
             { "value": "Kotlin", "label": "Kotlin" }
           ],
           "multiple": false,
-          "required": true
+          "required": true,
+          "stored": true
         }
       ]
     },
@@ -41,7 +43,8 @@
           "description": "SSO Login",
           "type": "STRING",
           "multiple": false,
-          "required": true
+          "required": true,
+          "stored": false
         }
       ]
     }
