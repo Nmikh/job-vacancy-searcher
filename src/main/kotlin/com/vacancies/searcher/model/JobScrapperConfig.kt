@@ -17,6 +17,7 @@ data class ScrapperParameter(
     val type: ScrapperParameterType,
     val required: Boolean = false,
     val multiple: Boolean = false,
+    val stored: Boolean = false,
     val options: List<ScrapperParameterOption>? = null,
 )
 

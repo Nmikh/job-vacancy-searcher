@@ -54,8 +54,9 @@ data class VacancyPreview(
 enum class VacancySource {
     DJINNI,
     DOU,
-    TEST_SCRAPPER_1,
-    TEST_SCRAPPER_2
+    TEST_SCRAPPER_SUCCESSFUL,
+    TEST_SCRAPPER_PARTLY_FAILED,
+    TEST_SCRAPPER_FAILED
 }
 
 enum class VacancyTag {

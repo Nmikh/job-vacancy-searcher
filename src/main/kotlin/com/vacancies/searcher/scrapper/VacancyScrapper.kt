@@ -1,7 +1,7 @@
 package com.vacancies.searcher.scrapper
 
+import com.vacancies.searcher.model.FailedUrl
 import com.vacancies.searcher.model.ScraperJobResult
-import com.vacancies.searcher.model.ScraperJobResultStatus
 import com.vacancies.searcher.model.Vacancy
 import com.vacancies.searcher.model.VacancySource
 import com.vacancies.searcher.repository.CompanyRepository
@@ -33,9 +33,18 @@ abstract class AbstractVacancyScrapper(
             val existingUrls = vacancyRepository.findAllBySourceAndActive(getSource(), true).map { it.url }
             val siteUrls = getVacancyLinks(parameters)
 
+            val successfulUrls = mutableListOf<String>()
+            val failedUrls = mutableListOf<FailedUrl>()
             val newVacancies = siteUrls
                 .filterNot { it in existingUrls }
-                .map { getVacancy(it, parameters) }
+                .mapNotNull { url ->
+                    getVacancyResult(url, parameters).fold(
+                        onSuccess = { successfulUrls.add(url); it },
+                        onFailure = {
+                            failedUrls.add(FailedUrl(url, it.message, it.stackTraceToString()))
+                            null
+                        })
+                }
                 .map { setUpCompany(it) }
 
             vacancyRepository.saveAll(newVacancies)
@@ -43,20 +52,26 @@ abstract class AbstractVacancyScrapper(
             val outdatedVacanciesUrls = existingUrls.filterNot { it in siteUrls }
             vacancyRepository.updateActiveStatus(outdatedVacanciesUrls, false)
 
-            ScraperJobResult(
-                status = ScraperJobResultStatus.SUCCESS,
+            if (failedUrls.isNotEmpty()) {
+                return ScraperJobResult.PartlyFailed(
+                    source = source,
+                    duration = Duration.between(startTime, Instant.now()),
+                    successfulUrls = successfulUrls,
+                    failedUrls = failedUrls
+                )
+            }
+
+            return ScraperJobResult.Success(
                 source = source,
-                newVacanciesAmount = newVacancies.size,
-                deactivatedVacanciesAmount = outdatedVacanciesUrls.size,
-                duration = Duration.between(startTime, Instant.now())
+                duration = Duration.between(startTime, Instant.now()),
+                successfulUrls = successfulUrls
             )
         }.getOrElse { ex ->
-            ScraperJobResult(
-                status = ScraperJobResultStatus.FAILURE,
+            ScraperJobResult.Failed(
                 source = source,
-                cause = ex.cause.toString(),
-                stackTrace = ex.stackTrace.joinToString("\n") { it.toString() },
-                duration = Duration.between(startTime, Instant.now())
+                duration = Duration.between(startTime, Instant.now()),
+                cause = ex.cause?.toString(),
+                stackTrace = ex.stackTraceToString()
             )
         }
     }
@@ -69,7 +84,11 @@ abstract class AbstractVacancyScrapper(
         return vacancy
     }
 
-    protected abstract fun getVacancyLinks(parameters: Map<String, String>): List<String>
+    private fun getVacancyResult(url: String, parameters: Map<String, String>): Result<Vacancy> =
+        runCatching { return Result.success(getVacancy(url, parameters)) }.getOrElse { Result.failure(it) }
 
     protected abstract fun getVacancy(url: String, parameters: Map<String, String>): Vacancy
+
+    protected abstract fun getVacancyLinks(parameters: Map<String, String>): List<String>
+
 }

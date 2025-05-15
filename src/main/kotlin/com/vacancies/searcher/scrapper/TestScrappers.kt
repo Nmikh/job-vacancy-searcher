@@ -13,11 +13,11 @@ import java.util.*
 
 @Service
 @ConditionalOnProperty(
-    value = ["scrapper.providers.testScrapper1"],
+    value = ["scrapper.providers.testScrapperSuccessful"],
     havingValue = "true",
     matchIfMissing = false
 )
-class TestScrapper1(
+class TestScrapperSuccessful(
     vacancyRepository: VacancyRepository,
     companyRepository: CompanyRepository
 ) : AbstractVacancyScrapper(vacancyRepository, companyRepository) {
@@ -25,8 +25,8 @@ class TestScrapper1(
         sleep(300)
 
         return listOf(
-            "https://example.com/testScrapper1/job1",
-            "https://example.com/testScrapper1/job2"
+            "https://example.com/TestScrapperSuccessful/job1",
+            "https://example.com/TestScrapperSuccessful/job2"
         )
     }
 
@@ -36,7 +36,7 @@ class TestScrapper1(
         return Vacancy(
             id = UUID.randomUUID(),
             url = url,
-            companyName = "Test Scrapper1",
+            companyName = "TestScrapperSuccessful",
             title = "Senior Java Developer",
             description = "This is a test job description for $url.",
             additionalAttributes = mapOf("location" to "Remote", "level" to "Senior"),
@@ -48,16 +48,16 @@ class TestScrapper1(
         )
     }
 
-    override fun getSource(): VacancySource = VacancySource.TEST_SCRAPPER_1
+    override fun getSource(): VacancySource = VacancySource.TEST_SCRAPPER_SUCCESSFUL
 }
 
 @Service
 @ConditionalOnProperty(
-    value = ["scrapper.providers.testScrapper2"],
+    value = ["scrapper.providers.testScrapperPartlyFailed"],
     havingValue = "true",
     matchIfMissing = false
 )
-class TestScrapper2(
+class TestScrapperPartlyFailed(
     vacancyRepository: VacancyRepository,
     companyRepository: CompanyRepository
 ) : AbstractVacancyScrapper(vacancyRepository, companyRepository) {
@@ -65,18 +65,21 @@ class TestScrapper2(
         sleep(300)
 
         return listOf(
-            "https://example.com/testScrapper2/job1",
-            "https://example.com/testScrapper2/job2"
+            "https://example.com/TestScrapperPartlyFailed/job1",
+            "https://example.com/TestScrapperPartlyFailed/job2"
         )
     }
 
     override fun getVacancy(url: String, parameters: Map<String, String>): Vacancy {
         sleep(300)
+        if ("https://example.com/TestScrapperPartlyFailed/job1" == url) {
+            throw Exception("TestScrapperPartlyFailed Failed")
+        }
 
         return Vacancy(
             id = UUID.randomUUID(),
             url = url,
-            companyName = "Test Scrapper2",
+            companyName = "TestScrapperPartlyFailed",
             title = "Senior Java Developer",
             description = "This is a test job description for $url.",
             additionalAttributes = mapOf("location" to "Remote", "level" to "Senior"),
@@ -88,5 +91,39 @@ class TestScrapper2(
         )
     }
 
-    override fun getSource(): VacancySource = VacancySource.TEST_SCRAPPER_2
+    override fun getSource(): VacancySource = VacancySource.TEST_SCRAPPER_PARTLY_FAILED
+}
+
+@Service
+@ConditionalOnProperty(
+    value = ["scrapper.providers.testScrapperFailed"],
+    havingValue = "true",
+    matchIfMissing = false
+)
+class TestScrapperFailed(
+    vacancyRepository: VacancyRepository,
+    companyRepository: CompanyRepository
+) : AbstractVacancyScrapper(vacancyRepository, companyRepository) {
+    override fun getVacancyLinks(parameters: Map<String, String>): List<String> {
+        sleep(300)
+        throw Exception("TestScrapperFailed")
+    }
+
+    override fun getVacancy(url: String, parameters: Map<String, String>): Vacancy {
+        return Vacancy(
+            id = UUID.randomUUID(),
+            url = url,
+            companyName = "TestScrapperPartlyFailed",
+            title = "Senior Java Developer",
+            description = "This is a test job description for $url.",
+            additionalAttributes = mapOf("location" to "Remote", "level" to "Senior"),
+            datePosted = LocalDateTime.now().minusDays(5),
+            dateScrapped = LocalDateTime.now(),
+            source = getSource(),
+            active = true,
+            tag = VacancyTag.NEW
+        )
+    }
+
+    override fun getSource(): VacancySource = VacancySource.TEST_SCRAPPER_FAILED
 }

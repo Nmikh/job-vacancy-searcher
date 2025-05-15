@@ -10,5 +10,6 @@ scrapper:
   providers:
     dou: false
     djinni: false
-    testScrapper1: true
-    testScrapper2: true
+    testScrapperSuccessful: true
+    testScrapperPartlyFailed: true
+    testScrapperFailed: true
