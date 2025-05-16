@@ -1,5 +1,7 @@
 package com.vacancies.searcher.model
 
+import com.vacancies.searcher.model.dto.ScraperJobDto
+import com.vacancies.searcher.model.dto.ScraperJobResultDto
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
@@ -27,4 +29,27 @@ data class ScraperJob(
 
 enum class ScraperJobStatus {
     IN_PROGRESS, FINISHED
+}
+
+fun ScraperJob.toDto(): ScraperJobDto = ScraperJobDto(
+    id = this.id,
+    scrapingRequest = this.scrapingRequest,
+    scrapingDateTime = this.scrapingDateTime,
+    status = this.status,
+    scrapingResults = this.scrapingResults.map { it.toDto() }
+)
+
+fun ScraperJobResult.toDto(): ScraperJobResultDto = when (this) {
+    is ScraperJobResult.Success -> ScraperJobResultDto.Success(
+        source = this.source,
+        successfulUrls = this.successfulUrls
+    )
+    is ScraperJobResult.PartlyFailed -> ScraperJobResultDto.PartlyFailed(
+        source = this.source,
+        successfulUrls = this.successfulUrls,
+        failedUrls = this.failedUrls.map { it.url }
+    )
+    is ScraperJobResult.Failed -> ScraperJobResultDto.Failed(
+        source = this.source
+    )
 }

@@ -23,6 +23,8 @@ dependencies {
 	implementation("com.squareup.okhttp3:okhttp:4.12.0")
 	implementation("org.json:json:20250107")
 	implementation("org.seleniumhq.selenium:selenium-java:4.31.0")
+	implementation("org.modelmapper:modelmapper:3.2.3")
+	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.19.0")
 
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb")

@@ -1,8 +1,9 @@
 package com.vacancies.searcher.controller
 
-import com.vacancies.searcher.model.ScraperJob
 import com.vacancies.searcher.model.ScrapingRequest
 import com.vacancies.searcher.model.ScrapperConfig
+import com.vacancies.searcher.model.dto.ScraperJobDto
+import com.vacancies.searcher.model.toDto
 import com.vacancies.searcher.service.ScrapperJobConfigService
 import com.vacancies.searcher.service.VacancyService
 import org.springframework.http.ResponseEntity
@@ -29,8 +30,9 @@ class ScrapperJobController(
     }
 
     @GetMapping("{jobId}")
-    fun jobStatus(@PathVariable jobId: UUID): ResponseEntity<ScraperJob> =
+    fun jobStatus(@PathVariable jobId: UUID): ResponseEntity<ScraperJobDto> =
         vacancyService.getScrappingStatus(jobId)
+            .map { it.toDto() }
             .map { ResponseEntity.ok(it) }
             .orElse(ResponseEntity.notFound().build())
 
