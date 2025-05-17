@@ -30,8 +30,15 @@ class ScrapperJobController(
     }
 
     @GetMapping("{jobId}")
-    fun jobStatus(@PathVariable jobId: UUID): ResponseEntity<ScraperJobDto> =
+    fun getJobStatus(@PathVariable jobId: UUID): ResponseEntity<ScraperJobDto> =
         vacancyService.getScrappingStatus(jobId)
+            .map { it.toDto() }
+            .map { ResponseEntity.ok(it) }
+            .orElse(ResponseEntity.notFound().build())
+
+    @GetMapping("latest")
+    fun getLatestJobStatus(): ResponseEntity<ScraperJobDto> =
+        vacancyService.getLatestScrappingStatus()
             .map { it.toDto() }
             .map { ResponseEntity.ok(it) }
             .orElse(ResponseEntity.notFound().build())

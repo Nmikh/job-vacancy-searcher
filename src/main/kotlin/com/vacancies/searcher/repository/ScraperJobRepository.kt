@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface ScraperJobRepository : MongoRepository<ScraperJob, UUID>
+interface ScraperJobRepository : MongoRepository<ScraperJob, UUID> {
+    fun findFirstByOrderByScrapingDateTime(): Optional<ScraperJob>
+}
