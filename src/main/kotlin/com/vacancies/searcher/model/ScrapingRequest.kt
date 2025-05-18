@@ -6,5 +6,5 @@ data class ScrapingRequest(
 
 data class ScraperInput(
     val source: VacancySource,
-    val parameters: Map<String, String> = emptyMap()
+    val parameters: Map<String, List<String>> = emptyMap()
 )

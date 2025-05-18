@@ -38,7 +38,7 @@ class DOUScrapper(
             "$BASE_URL/vacancies/?remote&category=Java&exp=5plus"
     }
 
-    override fun getVacancyLinks(parameters: Map<String, String>): List<String> {
+    override fun getVacancyLinks(parameters: Map<String, List<String>>): List<String> {
         val options = ChromeOptions().apply { addArguments("--headless") }
         return ChromeDriver(options).use { driver ->
             driver.manage().timeouts().implicitlyWait(Duration.of(10, ChronoUnit.SECONDS))
@@ -67,7 +67,7 @@ class DOUScrapper(
     private fun extractVacancyLinks(driver: WebDriver): List<String> =
         driver.findElements(By.cssSelector("a.vt")).mapNotNull { it.getAttribute("href") }
 
-    override fun getVacancy(url: String, parameters: Map<String, String>): Vacancy {
+    override fun getVacancy(url: String, parameters: Map<String, List<String>>): Vacancy {
         sleep(SLEEP_TIME)
 
         val document = Jsoup.connect(url).timeout(10 * 1000).get()

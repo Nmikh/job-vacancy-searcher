@@ -21,7 +21,7 @@ class TestScrapperSuccessful(
     vacancyRepository: VacancyRepository,
     companyRepository: CompanyRepository
 ) : AbstractVacancyScrapper(vacancyRepository, companyRepository) {
-    override fun getVacancyLinks(parameters: Map<String, String>): List<String> {
+    override fun getVacancyLinks(parameters: Map<String, List<String>>): List<String> {
         sleep(300)
 
         return listOf(
@@ -30,7 +30,7 @@ class TestScrapperSuccessful(
         )
     }
 
-    override fun getVacancy(url: String, parameters: Map<String, String>): Vacancy {
+    override fun getVacancy(url: String, parameters: Map<String, List<String>>): Vacancy {
         sleep(300)
 
         return Vacancy(
@@ -61,7 +61,7 @@ class TestScrapperPartlyFailed(
     vacancyRepository: VacancyRepository,
     companyRepository: CompanyRepository
 ) : AbstractVacancyScrapper(vacancyRepository, companyRepository) {
-    override fun getVacancyLinks(parameters: Map<String, String>): List<String> {
+    override fun getVacancyLinks(parameters: Map<String, List<String>>): List<String> {
         sleep(300)
 
         return listOf(
@@ -70,7 +70,7 @@ class TestScrapperPartlyFailed(
         )
     }
 
-    override fun getVacancy(url: String, parameters: Map<String, String>): Vacancy {
+    override fun getVacancy(url: String, parameters: Map<String, List<String>>): Vacancy {
         sleep(300)
         if ("https://example.com/TestScrapperPartlyFailed/job1" == url) {
             throw Exception("TestScrapperPartlyFailed Failed")
@@ -104,12 +104,12 @@ class TestScrapperFailed(
     vacancyRepository: VacancyRepository,
     companyRepository: CompanyRepository
 ) : AbstractVacancyScrapper(vacancyRepository, companyRepository) {
-    override fun getVacancyLinks(parameters: Map<String, String>): List<String> {
+    override fun getVacancyLinks(parameters: Map<String, List<String>>): List<String> {
         sleep(300)
         throw Exception("TestScrapperFailed")
     }
 
-    override fun getVacancy(url: String, parameters: Map<String, String>): Vacancy {
+    override fun getVacancy(url: String, parameters: Map<String, List<String>>): Vacancy {
         return Vacancy(
             id = UUID.randomUUID(),
             url = url,

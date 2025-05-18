@@ -11,7 +11,7 @@ import java.time.Instant
 
 
 interface VacancyScrapper {
-    fun scrapeVacancies(parameters: Map<String, String>): ScraperJobResult
+    fun scrapeVacancies(parameters: Map<String, List<String>>): ScraperJobResult
 
     fun getSource(): VacancySource
 }
@@ -25,7 +25,7 @@ abstract class AbstractVacancyScrapper(
         const val SLEEP_TIME = 30000L
     }
 
-    override fun scrapeVacancies(parameters: Map<String, String>): ScraperJobResult {
+    override fun scrapeVacancies(parameters: Map<String, List<String>>): ScraperJobResult {
         val startTime = Instant.now()
         val source = getSource()
 
@@ -84,11 +84,11 @@ abstract class AbstractVacancyScrapper(
         return vacancy
     }
 
-    private fun getVacancyResult(url: String, parameters: Map<String, String>): Result<Vacancy> =
+    private fun getVacancyResult(url: String, parameters: Map<String, List<String>>): Result<Vacancy> =
         runCatching { return Result.success(getVacancy(url, parameters)) }.getOrElse { Result.failure(it) }
 
-    protected abstract fun getVacancy(url: String, parameters: Map<String, String>): Vacancy
+    protected abstract fun getVacancy(url: String, parameters: Map<String, List<String>>): Vacancy
 
-    protected abstract fun getVacancyLinks(parameters: Map<String, String>): List<String>
+    protected abstract fun getVacancyLinks(parameters: Map<String, List<String>>): List<String>
 
 }
