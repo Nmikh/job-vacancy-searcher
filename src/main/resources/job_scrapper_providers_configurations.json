@@ -4,35 +4,7 @@
     {
       "name": "DOU",
       "description": "DOU",
-      "parameters": [
-        {
-          "name": "years",
-          "description": "Minimum number of years of experience",
-          "type": "ENUM",
-          "options": [
-            { "value": "1", "label": "1 year" },
-            { "value": "2", "label": "2 years" },
-            { "value": "3", "label": "3 years" },
-            { "value": "5", "label": "5 years" },
-            { "value": "7", "label": "7 years" }
-          ],
-          "multiple": false,
-          "required": true,
-          "stored": true
-        },
-        {
-          "name": "technology",
-          "description": "Technology",
-          "type": "ENUM",
-          "options": [
-            { "value": "Java", "label": "Java" },
-            { "value": "Kotlin", "label": "Kotlin" }
-          ],
-          "multiple": false,
-          "required": true,
-          "stored": true
-        }
-      ]
+      "parameters": []
     },
     {
       "name": "DJINNI",
@@ -44,6 +16,77 @@
           "type": "STRING",
           "multiple": false,
           "required": true,
+          "stored": false
+        }
+      ]
+    },
+    {
+      "name": "TEST_SCRAPPER_SUCCESSFUL",
+      "description": "Simulates a scrapper that always succeeds",
+      "parameters": [
+        {
+          "name": "keyword",
+          "description": "Keyword to search for",
+          "type": "STRING",
+          "required": true,
+          "multiple": false,
+          "stored": true
+        },
+        {
+          "name": "remoteOnly",
+          "description": "Only remote jobs",
+          "type": "BOOLEAN",
+          "required": false,
+          "multiple": false,
+          "stored": true
+        }
+      ]
+    },
+    {
+      "name": "TEST_SCRAPPER_PARTLY_FAILED",
+      "description": "Simulates a scrapper with partial failures",
+      "parameters": [
+        {
+          "name": "category",
+          "description": "Job category",
+          "type": "ENUM",
+          "required": true,
+          "multiple": false,
+          "stored": true,
+          "options": [
+            { "value": "dev", "label": "Developer" },
+            { "value": "qa", "label": "QA" },
+            { "value": "design", "label": "Design" }
+          ]
+        },
+        {
+          "name": "locations",
+          "description": "Preferred locations",
+          "type": "STRING",
+          "required": false,
+          "multiple": true,
+          "stored": false
+        }
+      ]
+    },
+    {
+      "name": "TEST_SCRAPPER_FAILED",
+      "description": "Simulates a scrapper that always fails",
+      "parameters": [
+        {
+          "name": "startDate",
+          "description": "Start date for scraping",
+          "type": "DATE",
+          "required": true,
+          "multiple": false,
+          "stored": true
+        },
+        {
+          "name": "maxResults",
+          "description": "Limit the number of results",
+          "type": "NUMBER",
+          "required": false,
+          "multiple": false,
           "stored": false
         }
       ]
