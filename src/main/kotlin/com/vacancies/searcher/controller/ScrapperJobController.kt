@@ -3,6 +3,7 @@ package com.vacancies.searcher.controller
 import com.vacancies.searcher.model.ScrapingRequest
 import com.vacancies.searcher.model.ScrapperConfig
 import com.vacancies.searcher.model.dto.ScraperJobDto
+import com.vacancies.searcher.model.dto.StartJobResponse
 import com.vacancies.searcher.model.toDto
 import com.vacancies.searcher.service.ScrapperJobConfigService
 import com.vacancies.searcher.service.VacancyService
@@ -22,11 +23,11 @@ class ScrapperJobController(
     private val scrapperJobConfigService: ScrapperJobConfigService
 ) {
     @PostMapping("start")
-    fun startScrape(@RequestBody request: ScrapingRequest): ResponseEntity<UUID> {
+    fun startScrape(@RequestBody request: ScrapingRequest): ResponseEntity<StartJobResponse> {
         val jobId = UUID.randomUUID()
         vacancyService.startScrapping(request, jobId)
 
-        return ResponseEntity.ok(jobId)
+        return ResponseEntity.ok(StartJobResponse(jobId))
     }
 
     @GetMapping("{jobId}")
