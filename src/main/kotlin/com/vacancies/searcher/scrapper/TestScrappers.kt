@@ -22,7 +22,7 @@ class TestScrapperSuccessful(
     companyRepository: CompanyRepository
 ) : AbstractVacancyScrapper(vacancyRepository, companyRepository) {
     override fun getVacancyLinks(parameters: Map<String, List<String>>): List<String> {
-        sleep(300)
+        sleep(30000)
 
         return listOf(
             "https://example.com/TestScrapperSuccessful/job1",

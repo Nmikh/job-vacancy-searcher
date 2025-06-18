@@ -7,5 +7,5 @@ import java.util.*
 
 @Repository
 interface ScraperJobRepository : MongoRepository<ScraperJob, UUID> {
-    fun findFirstByOrderByScrapingDateTime(): Optional<ScraperJob>
+    fun findFirstByOrderByScrapingDateTimeDesc(): Optional<ScraperJob>
 }
