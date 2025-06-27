@@ -31,8 +31,8 @@ class VacancyController(
             .orElse(ResponseEntity.notFound().build())
 
     @PatchMapping("{id}/tag")
-    fun changeVacancyTag(@PathVariable id: UUID, @RequestParam vacancyTag: VacancyTag): ResponseEntity<Unit> {
-        vacancyService.changeTag(id, vacancyTag)
+    fun changeVacancyTag(@PathVariable id: UUID, @RequestParam tag: VacancyTag): ResponseEntity<Unit> {
+        vacancyService.changeTag(id, tag)
         return ResponseEntity.ok().build()
     }
 }
