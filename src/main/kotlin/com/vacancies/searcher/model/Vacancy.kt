@@ -60,5 +60,5 @@ enum class VacancySource {
 }
 
 enum class VacancyTag {
-    NEW, NOT_INTERESTED, STARED, APPLIED
+    NEW, NOT_INTERESTED, INTERESTED, APPLIED
 }

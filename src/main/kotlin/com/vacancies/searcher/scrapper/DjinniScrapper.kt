@@ -36,14 +36,14 @@ class DjinniScrapper(
     }
 
     override fun getVacancyLinks(parameters: Map<String, List<String>>): List<String> {
-        val sessionCookie = parameters["session_cookie"] ?: error("session_cookie is required")
+        val ssoLogin = parameters["sso_login"] ?: error("sso_login is required")
         val client = OkHttpClient.Builder().followRedirects(false).build()
 
         return generateSequence(1) { it + 1 }
             .mapNotNull { page ->
                 val request = Request.Builder()
                     .url("$JOB_SEARCH_URL&page=$page")
-                    .header("Cookie", sessionCookie[0])
+                    .header("Cookie", ssoLogin[0])
                     .build()
 
                 val response = client.newCall(request).execute()
@@ -64,7 +64,7 @@ class DjinniScrapper(
     override fun getVacancy(url: String, parameters: Map<String, List<String>>): Vacancy {
         sleep(SLEEP_TIME)
 
-        val document = Jsoup.connect(url).timeout(10 * 1000).header("Cookie", parameters["session_cookie"]!![0]).get()
+        val document = Jsoup.connect(url).timeout(10 * 1000).header("Cookie", parameters["sso_login"]!![0]).get()
         val vacancy = document.selectFirst("script[type=application/ld+json]")?.html()
         val json = JSONObject(vacancy)
         val attributes = document.select("li.mb-1").mapNotNull { it.selectFirst("div.col")?.text() }
