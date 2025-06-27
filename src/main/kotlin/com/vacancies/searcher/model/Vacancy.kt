@@ -48,7 +48,8 @@ data class VacancyPreview(
     val id: UUID,
     val url: String,
     val companyName: String,
-    val title: String
+    val title: String,
+    val source: VacancySource
 )
 
 enum class VacancySource {
