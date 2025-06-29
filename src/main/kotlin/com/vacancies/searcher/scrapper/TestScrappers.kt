@@ -18,9 +18,8 @@ import java.util.*
     matchIfMissing = false
 )
 class TestScrapperSuccessful(
-    vacancyRepository: VacancyRepository,
-    companyRepository: CompanyRepository
-) : AbstractVacancyScrapper(vacancyRepository, companyRepository) {
+    vacancyRepository: VacancyRepository
+) : AbstractVacancyScrapper(vacancyRepository) {
     override fun getVacancyLinks(parameters: Map<String, List<String>>): List<String> {
         sleep(30000)
 
@@ -65,9 +64,8 @@ class TestScrapperSuccessful(
     matchIfMissing = false
 )
 class TestScrapperPartlyFailed(
-    vacancyRepository: VacancyRepository,
-    companyRepository: CompanyRepository
-) : AbstractVacancyScrapper(vacancyRepository, companyRepository) {
+    vacancyRepository: VacancyRepository
+) : AbstractVacancyScrapper(vacancyRepository) {
     override fun getVacancyLinks(parameters: Map<String, List<String>>): List<String> {
         sleep(300)
 
@@ -121,9 +119,8 @@ class TestScrapperPartlyFailed(
     matchIfMissing = false
 )
 class TestScrapperFailed(
-    vacancyRepository: VacancyRepository,
-    companyRepository: CompanyRepository
-) : AbstractVacancyScrapper(vacancyRepository, companyRepository) {
+    vacancyRepository: VacancyRepository
+) : AbstractVacancyScrapper(vacancyRepository) {
     override fun getVacancyLinks(parameters: Map<String, List<String>>): List<String> {
         sleep(300)
         throw Exception("TestScrapperFailed")

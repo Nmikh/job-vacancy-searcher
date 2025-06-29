@@ -4,7 +4,6 @@ import com.vacancies.searcher.model.FailedUrl
 import com.vacancies.searcher.model.ScraperJobResult
 import com.vacancies.searcher.model.Vacancy
 import com.vacancies.searcher.model.VacancySource
-import com.vacancies.searcher.repository.CompanyRepository
 import com.vacancies.searcher.repository.VacancyRepository
 import java.time.Duration
 import java.time.Instant
@@ -17,8 +16,7 @@ interface VacancyScrapper {
 }
 
 abstract class AbstractVacancyScrapper(
-    private val vacancyRepository: VacancyRepository,
-    private val companyRepository: CompanyRepository
+    private val vacancyRepository: VacancyRepository
 ) : VacancyScrapper {
 
     companion object {

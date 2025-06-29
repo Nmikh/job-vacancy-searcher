@@ -26,9 +26,8 @@ import java.util.*
     matchIfMissing = false
 )
 class DjinniScrapper(
-    vacancyRepository: VacancyRepository,
-    companyRepository: CompanyRepository
-) : AbstractVacancyScrapper(vacancyRepository, companyRepository) {
+    vacancyRepository: VacancyRepository
+) : AbstractVacancyScrapper(vacancyRepository) {
     companion object {
         private const val BASE_URL = "https://djinni.co"
         private const val JOB_SEARCH_URL =
