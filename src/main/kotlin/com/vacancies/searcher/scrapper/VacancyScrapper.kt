@@ -6,6 +6,7 @@ import com.vacancies.searcher.model.Vacancy
 import com.vacancies.searcher.model.VacancySource
 import com.vacancies.searcher.repository.VacancyRepository
 import com.vacancies.searcher.service.ScraperJobProgressService
+import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.Instant
 import java.util.*
@@ -22,6 +23,8 @@ abstract class AbstractVacancyScrapper(
     private val scraperJobProgressService: ScraperJobProgressService
 ) : VacancyScrapper {
 
+    private val log = LoggerFactory.getLogger(javaClass)
+
     companion object {
         const val SLEEP_TIME = 30000L
     }
@@ -30,9 +33,18 @@ abstract class AbstractVacancyScrapper(
         val startTime = Instant.now()
         val source = getSource()
 
+        log.info("Starting scraping for source={} with jobId={}", source, jobId)
+
         val existingUrls = vacancyRepository.findAllBySourceAndActive(source, true).map { it.url }
         val vacancyLinksResult = runCatching { getVacancyLinks(parameters) }
         val siteUrls = vacancyLinksResult.getOrElse { exception ->
+            log.error(
+                "Failed to get vacancy links for source={} with jobId={}: {}",
+                source,
+                jobId,
+                exception.message,
+                exception
+            )
             return ScraperJobResult.Failed(
                 source = source,
                 duration = Duration.between(startTime, Instant.now()),
@@ -43,6 +55,13 @@ abstract class AbstractVacancyScrapper(
 
         val newUrls = siteUrls.filterNot { it in existingUrls }
         scraperJobProgressService.addTotal(jobId, source, newUrls.size)
+        log.info(
+            "Found {} total URLs, {} new URLs to scrape for source={} with jobId={}",
+            siteUrls.size,
+            newUrls.size,
+            source,
+            jobId
+        )
 
         val (successfulUrlsPairs, failedUrlsPairs) =
             newUrls.map { url ->
@@ -50,8 +69,17 @@ abstract class AbstractVacancyScrapper(
                     .also { result ->
                         if (result.isSuccess) {
                             scraperJobProgressService.increaseSuccess(jobId, source)
+                            log.info("Successfully scraped URL={} for source={} with jobId={}", url, source, jobId)
                         } else {
                             scraperJobProgressService.increaseFailed(jobId, source)
+                            val ex = result.exceptionOrNull()
+                            log.warn(
+                                "Failed to scrape URL={} for source={} with jobId={}: {}",
+                                url,
+                                source,
+                                jobId,
+                                ex?.message
+                            )
                         }
                     }
             }.partition { it.second.isSuccess }
@@ -66,6 +94,11 @@ abstract class AbstractVacancyScrapper(
         vacancyRepository.updateActiveStatus(outdatedUrls, false)
 
         val duration = Duration.between(startTime, Instant.now())
+
+        log.info(
+            "Scraping finished for source={} with jobId={} in {}s: success={}, failed={}, outdated={}",
+            source, jobId, duration.seconds, successfulUrls.size, failedUrls.size, outdatedUrls.size
+        )
 
         if (failedUrls.isNotEmpty()) {
             return ScraperJobResult.PartlyFailed(
