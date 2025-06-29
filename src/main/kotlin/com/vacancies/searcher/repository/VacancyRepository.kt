@@ -18,4 +18,6 @@ interface VacancyRepository : MongoRepository<Vacancy, UUID> {
     @Query("{ 'url' :  { \$in: ?0 } }")
     @Update("{ '\$set' : { 'active' : ?1 } }")
     fun updateActiveStatus(urls: List<String>, active: Boolean)
+
+    fun deleteAllBySourceIn(sources: List<VacancySource>)
 }

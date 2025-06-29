@@ -1,5 +1,6 @@
 package com.vacancies.searcher.controller
 
+import com.vacancies.searcher.model.VacancySource
 import com.vacancies.searcher.repository.ScraperJobRepository
 import com.vacancies.searcher.repository.VacancyRepository
 import org.springframework.http.ResponseEntity
@@ -17,6 +18,18 @@ class AdminController(
     fun removeAllJobs(): ResponseEntity<Unit> {
         jobRepository.deleteAll()
         vacancyRepository.deleteAll()
+        return ResponseEntity.ok().build()
+    }
+
+    @DeleteMapping("/vacancies/test")
+    fun removeTestVacancies(): ResponseEntity<Unit> {
+        vacancyRepository.deleteAllBySourceIn(
+            listOf(
+                VacancySource.TEST_SCRAPPER_FAILED,
+                VacancySource.TEST_SCRAPPER_SUCCESSFUL,
+                VacancySource.TEST_SCRAPPER_PARTLY_FAILED
+            )
+        )
         return ResponseEntity.ok().build()
     }
 }

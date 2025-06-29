@@ -29,66 +29,56 @@ abstract class AbstractVacancyScrapper(
         val startTime = Instant.now()
         val source = getSource()
 
-        return runCatching {
-            val existingUrls = vacancyRepository.findAllBySourceAndActive(getSource(), true).map { it.url }
-            val siteUrls = getVacancyLinks(parameters)
-
-            val successfulUrls = mutableListOf<String>()
-            val failedUrls = mutableListOf<FailedUrl>()
-            val newVacancies = siteUrls
-                .filterNot { it in existingUrls }
-                .mapNotNull { url ->
-                    getVacancyResult(url, parameters).fold(
-                        onSuccess = { successfulUrls.add(url); it },
-                        onFailure = {
-                            failedUrls.add(FailedUrl(url, it.message, it.stackTraceToString()))
-                            null
-                        })
-                }
-                .map { setUpCompany(it) }
-
-            vacancyRepository.saveAll(newVacancies)
-
-            val outdatedVacanciesUrls = existingUrls.filterNot { it in siteUrls }
-            vacancyRepository.updateActiveStatus(outdatedVacanciesUrls, false)
-
-            if (failedUrls.isNotEmpty()) {
-                return ScraperJobResult.PartlyFailed(
-                    source = source,
-                    duration = Duration.between(startTime, Instant.now()),
-                    successfulUrls = successfulUrls,
-                    failedUrls = failedUrls
-                )
-            }
-
-            return ScraperJobResult.Success(
+        val existingUrls = vacancyRepository.findAllBySourceAndActive(source, true).map { it.url }
+        val vacancyLinksResult = runCatching { getVacancyLinks(parameters) }
+        val siteUrls = vacancyLinksResult.getOrElse { exception ->
+            return ScraperJobResult.Failed(
                 source = source,
                 duration = Duration.between(startTime, Instant.now()),
-                successfulUrls = successfulUrls
-            )
-        }.getOrElse { ex ->
-            ScraperJobResult.Failed(
-                source = source,
-                duration = Duration.between(startTime, Instant.now()),
-                cause = ex.cause?.toString(),
-                stackTrace = ex.stackTraceToString()
+                cause = exception.message,
+                stackTrace = exception.stackTraceToString()
             )
         }
-    }
 
-    private fun setUpCompany(vacancy: Vacancy): Vacancy {
-        companyRepository
-            .findOneByAlternativeNamesIn(vacancy.companyName)
-            ?.let { vacancy.companyId = it.id }
+        val (successfulUrlsPairs, failedUrlsPairs) = siteUrls
+            .filterNot { it in existingUrls }
+            .map { it to getVacancyResult(it, parameters) }
+            .partition { it.second.isSuccess }
 
-        return vacancy
+        val successfulUrls = successfulUrlsPairs.map { it.first }
+        val failedUrls = failedUrlsPairs.map { (url, result) ->
+            val ex = result.exceptionOrNull()
+            FailedUrl(url, ex?.message, ex?.stackTraceToString())
+        }
+
+        val outdatedUrls = existingUrls.filterNot { it in siteUrls }
+        vacancyRepository.updateActiveStatus(outdatedUrls, false)
+
+        val duration = Duration.between(startTime, Instant.now())
+        if (failedUrls.isNotEmpty()) {
+            return ScraperJobResult.PartlyFailed(
+                source = source,
+                duration = duration,
+                successfulUrls = successfulUrls,
+                failedUrls = failedUrls
+            )
+        }
+
+        return ScraperJobResult.Success(
+            source = source,
+            duration = duration,
+            successfulUrls = successfulUrls
+        )
     }
 
     private fun getVacancyResult(url: String, parameters: Map<String, List<String>>): Result<Vacancy> =
-        runCatching { return Result.success(getVacancy(url, parameters)) }.getOrElse { Result.failure(it) }
+        runCatching {
+            val vacancy = getVacancy(url, parameters)
+            vacancyRepository.save(vacancy)
+            vacancy
+        }
 
     protected abstract fun getVacancy(url: String, parameters: Map<String, List<String>>): Vacancy
 
     protected abstract fun getVacancyLinks(parameters: Map<String, List<String>>): List<String>
-
 }

@@ -26,7 +26,14 @@ class TestScrapperSuccessful(
 
         return listOf(
             "https://example.com/TestScrapperSuccessful/job1",
-            "https://example.com/TestScrapperSuccessful/job2"
+            "https://example.com/TestScrapperSuccessful/job2",
+            "https://example.com/TestScrapperSuccessful/job3",
+            "https://example.com/TestScrapperSuccessful/job4",
+            "https://example.com/TestScrapperSuccessful/job5",
+            "https://example.com/TestScrapperSuccessful/job6",
+            "https://example.com/TestScrapperSuccessful/job7",
+            "https://example.com/TestScrapperSuccessful/job8",
+            "https://example.com/TestScrapperSuccessful/job9",
         )
     }
 
@@ -66,13 +73,26 @@ class TestScrapperPartlyFailed(
 
         return listOf(
             "https://example.com/TestScrapperPartlyFailed/job1",
-            "https://example.com/TestScrapperPartlyFailed/job2"
+            "https://example.com/TestScrapperPartlyFailed/job2",
+            "https://example.com/TestScrapperPartlyFailed/job3",
+            "https://example.com/TestScrapperPartlyFailed/job4",
+            "https://example.com/TestScrapperPartlyFailed/job5",
+            "https://example.com/TestScrapperPartlyFailed/job6",
+            "https://example.com/TestScrapperPartlyFailed/job7",
+            "https://example.com/TestScrapperPartlyFailed/job8",
+            "https://example.com/TestScrapperPartlyFailed/job9",
         )
     }
 
     override fun getVacancy(url: String, parameters: Map<String, List<String>>): Vacancy {
         sleep(300)
-        if ("https://example.com/TestScrapperPartlyFailed/job1" == url) {
+        if (
+            url == "https://example.com/TestScrapperPartlyFailed/job1" ||
+            url == "https://example.com/TestScrapperPartlyFailed/job3" ||
+            url == "https://example.com/TestScrapperPartlyFailed/job5" ||
+            url == "https://example.com/TestScrapperPartlyFailed/job7" ||
+            url == "https://example.com/TestScrapperPartlyFailed/job9"
+        ) {
             throw Exception("TestScrapperPartlyFailed Failed")
         }
 
