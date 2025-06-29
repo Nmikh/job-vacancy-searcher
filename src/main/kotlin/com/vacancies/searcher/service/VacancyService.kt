@@ -46,7 +46,7 @@ class VacancyService(
     fun getLatestScrappingStatus() = scraperJobRepository.findFirstByOrderByScrapingDateTimeDesc()
 
     fun getVacanciesPreviews(tag: VacancyTag): List<VacancyPreview> =
-        vacancyRepository.findAllByTagAndActive(tag, true)
+        vacancyRepository.findAllByTagAndActiveOrderByDatePostedDesc(tag, true)
             .map { VacancyPreview(it.id, it.url, it.companyName, it.title, it.source) }
 
     fun getVacancy(id: UUID) = vacancyRepository.findById(id)

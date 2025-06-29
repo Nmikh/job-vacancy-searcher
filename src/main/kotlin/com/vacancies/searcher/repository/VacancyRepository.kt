@@ -13,7 +13,7 @@ import java.util.*
 interface VacancyRepository : MongoRepository<Vacancy, UUID> {
     fun findAllBySourceAndActive(source: VacancySource, active: Boolean): List<Vacancy>
 
-    fun findAllByTagAndActive(tag: VacancyTag, active: Boolean): List<Vacancy>
+    fun findAllByTagAndActiveOrderByDatePostedDesc(tag: VacancyTag, active: Boolean): List<Vacancy>
 
     @Query("{ 'url' :  { \$in: ?0 } }")
     @Update("{ '\$set' : { 'active' : ?1 } }")
