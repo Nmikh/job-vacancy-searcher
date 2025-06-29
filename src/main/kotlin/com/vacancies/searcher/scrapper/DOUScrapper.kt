@@ -3,8 +3,8 @@ package com.vacancies.searcher.scrapper
 import com.vacancies.searcher.model.Vacancy
 import com.vacancies.searcher.model.VacancySource
 import com.vacancies.searcher.model.VacancyTag
-import com.vacancies.searcher.repository.CompanyRepository
 import com.vacancies.searcher.repository.VacancyRepository
+import com.vacancies.searcher.service.ScraperJobProgressService
 import org.jsoup.Jsoup
 import org.openqa.selenium.By
 import org.openqa.selenium.WebDriver
@@ -29,8 +29,9 @@ import java.util.*
     matchIfMissing = false
 )
 class DOUScrapper(
-    vacancyRepository: VacancyRepository
-) : AbstractVacancyScrapper(vacancyRepository) {
+    vacancyRepository: VacancyRepository,
+    scraperJobProgressService: ScraperJobProgressService
+) : AbstractVacancyScrapper(vacancyRepository, scraperJobProgressService) {
     companion object {
         private const val BASE_URL = "https://jobs.dou.ua"
         private const val JOB_SEARCH_URL =

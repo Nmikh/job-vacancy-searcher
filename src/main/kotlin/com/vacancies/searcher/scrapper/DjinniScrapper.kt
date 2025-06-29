@@ -3,8 +3,8 @@ package com.vacancies.searcher.scrapper
 import com.vacancies.searcher.model.Vacancy
 import com.vacancies.searcher.model.VacancySource
 import com.vacancies.searcher.model.VacancyTag
-import com.vacancies.searcher.repository.CompanyRepository
 import com.vacancies.searcher.repository.VacancyRepository
+import com.vacancies.searcher.service.ScraperJobProgressService
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
@@ -26,8 +26,9 @@ import java.util.*
     matchIfMissing = false
 )
 class DjinniScrapper(
-    vacancyRepository: VacancyRepository
-) : AbstractVacancyScrapper(vacancyRepository) {
+    vacancyRepository: VacancyRepository,
+    scraperJobProgressService: ScraperJobProgressService
+) : AbstractVacancyScrapper(vacancyRepository, scraperJobProgressService) {
     companion object {
         private const val BASE_URL = "https://djinni.co"
         private const val JOB_SEARCH_URL =

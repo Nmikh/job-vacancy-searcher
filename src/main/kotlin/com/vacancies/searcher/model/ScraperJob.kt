@@ -1,6 +1,7 @@
 package com.vacancies.searcher.model
 
 import com.vacancies.searcher.model.dto.ScraperJobDto
+import com.vacancies.searcher.model.dto.ScraperJobProgressDto
 import com.vacancies.searcher.model.dto.ScraperJobResultDto
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
@@ -31,12 +32,13 @@ enum class ScraperJobStatus {
     IN_PROGRESS, FINISHED
 }
 
-fun ScraperJob.toDto(): ScraperJobDto = ScraperJobDto(
+fun ScraperJob.toDto(scraperJobProgress: Map<VacancySource, ScraperJobProgressDto>): ScraperJobDto = ScraperJobDto(
     id = this.id,
     scrapingRequest = this.scrapingRequest,
     scrapingDateTime = this.scrapingDateTime,
     status = this.status,
-    scrapingResults = this.scrapingResults.map { it.toDto() }
+    scrapingResults = this.scrapingResults.map { it.toDto() },
+    scraperJobProgress = scraperJobProgress
 )
 
 fun ScraperJobResult.toDto(): ScraperJobResultDto = when (this) {

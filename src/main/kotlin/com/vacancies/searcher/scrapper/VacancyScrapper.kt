@@ -5,25 +5,28 @@ import com.vacancies.searcher.model.ScraperJobResult
 import com.vacancies.searcher.model.Vacancy
 import com.vacancies.searcher.model.VacancySource
 import com.vacancies.searcher.repository.VacancyRepository
+import com.vacancies.searcher.service.ScraperJobProgressService
 import java.time.Duration
 import java.time.Instant
+import java.util.*
 
 
 interface VacancyScrapper {
-    fun scrapeVacancies(parameters: Map<String, List<String>>): ScraperJobResult
+    fun scrapeVacancies(parameters: Map<String, List<String>>, jobId: UUID): ScraperJobResult
 
     fun getSource(): VacancySource
 }
 
 abstract class AbstractVacancyScrapper(
-    private val vacancyRepository: VacancyRepository
+    private val vacancyRepository: VacancyRepository,
+    private val scraperJobProgressService: ScraperJobProgressService
 ) : VacancyScrapper {
 
     companion object {
         const val SLEEP_TIME = 30000L
     }
 
-    override fun scrapeVacancies(parameters: Map<String, List<String>>): ScraperJobResult {
+    override fun scrapeVacancies(parameters: Map<String, List<String>>, jobId: UUID): ScraperJobResult {
         val startTime = Instant.now()
         val source = getSource()
 
@@ -38,10 +41,20 @@ abstract class AbstractVacancyScrapper(
             )
         }
 
-        val (successfulUrlsPairs, failedUrlsPairs) = siteUrls
-            .filterNot { it in existingUrls }
-            .map { it to getVacancyResult(it, parameters) }
-            .partition { it.second.isSuccess }
+        val newUrls = siteUrls.filterNot { it in existingUrls }
+        scraperJobProgressService.addTotal(jobId, source, newUrls.size)
+
+        val (successfulUrlsPairs, failedUrlsPairs) =
+            newUrls.map { url ->
+                url to getVacancyResult(url, parameters)
+                    .also { result ->
+                        if (result.isSuccess) {
+                            scraperJobProgressService.increaseSuccess(jobId, source)
+                        } else {
+                            scraperJobProgressService.increaseFailed(jobId, source)
+                        }
+                    }
+            }.partition { it.second.isSuccess }
 
         val successfulUrls = successfulUrlsPairs.map { it.first }
         val failedUrls = failedUrlsPairs.map { (url, result) ->
@@ -53,6 +66,7 @@ abstract class AbstractVacancyScrapper(
         vacancyRepository.updateActiveStatus(outdatedUrls, false)
 
         val duration = Duration.between(startTime, Instant.now())
+
         if (failedUrls.isNotEmpty()) {
             return ScraperJobResult.PartlyFailed(
                 source = source,

@@ -5,6 +5,7 @@ import com.vacancies.searcher.model.ScrapperConfig
 import com.vacancies.searcher.model.dto.ScraperJobDto
 import com.vacancies.searcher.model.dto.StartJobResponse
 import com.vacancies.searcher.model.toDto
+import com.vacancies.searcher.service.ScraperJobProgressService
 import com.vacancies.searcher.service.ScrapperJobConfigService
 import com.vacancies.searcher.service.VacancyService
 import org.springframework.http.ResponseEntity
@@ -20,7 +21,8 @@ import java.util.*
 @RequestMapping("/api/v1/scrapper/job")
 class ScrapperJobController(
     private val vacancyService: VacancyService,
-    private val scrapperJobConfigService: ScrapperJobConfigService
+    private val scrapperJobConfigService: ScrapperJobConfigService,
+    private val scraperJobProgressService: ScraperJobProgressService
 ) {
     @PostMapping("start")
     fun startScrape(@RequestBody request: ScrapingRequest): ResponseEntity<StartJobResponse> {
@@ -33,14 +35,14 @@ class ScrapperJobController(
     @GetMapping("{jobId}")
     fun getJobStatus(@PathVariable jobId: UUID): ResponseEntity<ScraperJobDto> =
         vacancyService.getScrappingStatus(jobId)
-            .map { it.toDto() }
+            .map { it.toDto(scraperJobProgressService.getProgress(it.id)) }
             .map { ResponseEntity.ok(it) }
             .orElse(ResponseEntity.notFound().build())
 
     @GetMapping("latest")
     fun getLatestJobStatus(): ResponseEntity<ScraperJobDto> =
         vacancyService.getLatestScrappingStatus()
-            .map { it.toDto() }
+            .map { it.toDto(scraperJobProgressService.getProgress(it.id)) }
             .map { ResponseEntity.ok(it) }
             .orElse(ResponseEntity.notFound().build())
 

@@ -13,7 +13,8 @@ data class ScraperJobDto(
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     val scrapingDateTime: LocalDateTime,
     val status: ScraperJobStatus,
-    val scrapingResults: List<ScraperJobResultDto>
+    val scrapingResults: List<ScraperJobResultDto>,
+    val scraperJobProgress: Map<VacancySource, ScraperJobProgressDto> = emptyMap()
 )
 
 sealed class ScraperJobResultDto {

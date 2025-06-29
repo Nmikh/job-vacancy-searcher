@@ -31,7 +31,7 @@ class VacancyService(
             .mapNotNull { scrapper ->
                 request.inputs
                     .find { it.source == scrapper.getSource() }
-                    ?.let { scrapper.scrapeVacancies(it.parameters) }
+                    ?.let { scrapper.scrapeVacancies(it.parameters, jobId) }
             }
         scraperJob.status = ScraperJobStatus.FINISHED
         scraperJob.scrapingResults = results

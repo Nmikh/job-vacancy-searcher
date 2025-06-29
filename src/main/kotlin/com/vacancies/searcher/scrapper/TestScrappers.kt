@@ -3,8 +3,8 @@ package com.vacancies.searcher.scrapper
 import com.vacancies.searcher.model.Vacancy
 import com.vacancies.searcher.model.VacancySource
 import com.vacancies.searcher.model.VacancyTag
-import com.vacancies.searcher.repository.CompanyRepository
 import com.vacancies.searcher.repository.VacancyRepository
+import com.vacancies.searcher.service.ScraperJobProgressService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 import java.lang.Thread.sleep
@@ -18,8 +18,9 @@ import java.util.*
     matchIfMissing = false
 )
 class TestScrapperSuccessful(
-    vacancyRepository: VacancyRepository
-) : AbstractVacancyScrapper(vacancyRepository) {
+    vacancyRepository: VacancyRepository,
+    scraperJobProgressService: ScraperJobProgressService
+) : AbstractVacancyScrapper(vacancyRepository, scraperJobProgressService) {
     override fun getVacancyLinks(parameters: Map<String, List<String>>): List<String> {
         sleep(30000)
 
@@ -64,8 +65,9 @@ class TestScrapperSuccessful(
     matchIfMissing = false
 )
 class TestScrapperPartlyFailed(
-    vacancyRepository: VacancyRepository
-) : AbstractVacancyScrapper(vacancyRepository) {
+    vacancyRepository: VacancyRepository,
+    scraperJobProgressService: ScraperJobProgressService
+) : AbstractVacancyScrapper(vacancyRepository, scraperJobProgressService) {
     override fun getVacancyLinks(parameters: Map<String, List<String>>): List<String> {
         sleep(300)
 
@@ -119,8 +121,9 @@ class TestScrapperPartlyFailed(
     matchIfMissing = false
 )
 class TestScrapperFailed(
-    vacancyRepository: VacancyRepository
-) : AbstractVacancyScrapper(vacancyRepository) {
+    vacancyRepository: VacancyRepository,
+    scraperJobProgressService: ScraperJobProgressService
+) : AbstractVacancyScrapper(vacancyRepository, scraperJobProgressService) {
     override fun getVacancyLinks(parameters: Map<String, List<String>>): List<String> {
         sleep(300)
         throw Exception("TestScrapperFailed")
