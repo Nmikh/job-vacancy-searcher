@@ -7,13 +7,15 @@ import com.vacancies.searcher.model.VacancySource
 import com.vacancies.searcher.repository.VacancyRepository
 import com.vacancies.searcher.service.ScraperJobProgressService
 import org.slf4j.LoggerFactory
+import org.springframework.scheduling.annotation.Async
 import java.time.Duration
 import java.time.Instant
 import java.util.*
+import java.util.concurrent.CompletableFuture
 
 
 interface VacancyScrapper {
-    fun scrapeVacancies(parameters: Map<String, List<String>>, jobId: UUID): ScraperJobResult
+    fun scrapeVacancies(parameters: Map<String, List<String>>, jobId: UUID): CompletableFuture<ScraperJobResult>
 
     fun getSource(): VacancySource
 }
@@ -29,7 +31,11 @@ abstract class AbstractVacancyScrapper(
         const val SLEEP_TIME = 30000L
     }
 
-    override fun scrapeVacancies(parameters: Map<String, List<String>>, jobId: UUID): ScraperJobResult {
+    @Async
+    override fun scrapeVacancies(
+        parameters: Map<String, List<String>>,
+        jobId: UUID
+    ): CompletableFuture<ScraperJobResult> {
         val startTime = Instant.now()
         val source = getSource()
 
@@ -45,11 +51,13 @@ abstract class AbstractVacancyScrapper(
                 exception.message,
                 exception
             )
-            return ScraperJobResult.Failed(
-                source = source,
-                duration = Duration.between(startTime, Instant.now()),
-                cause = exception.message,
-                stackTrace = exception.stackTraceToString()
+            return CompletableFuture.completedFuture(
+                ScraperJobResult.Failed(
+                    source = source,
+                    duration = Duration.between(startTime, Instant.now()),
+                    cause = exception.message,
+                    stackTrace = exception.stackTraceToString()
+                )
             )
         }
 
@@ -101,18 +109,22 @@ abstract class AbstractVacancyScrapper(
         )
 
         if (failedUrls.isNotEmpty()) {
-            return ScraperJobResult.PartlyFailed(
-                source = source,
-                duration = duration,
-                successfulUrls = successfulUrls,
-                failedUrls = failedUrls
+            return CompletableFuture.completedFuture(
+                ScraperJobResult.PartlyFailed(
+                    source = source,
+                    duration = duration,
+                    successfulUrls = successfulUrls,
+                    failedUrls = failedUrls
+                )
             )
         }
 
-        return ScraperJobResult.Success(
-            source = source,
-            duration = duration,
-            successfulUrls = successfulUrls
+        return CompletableFuture.completedFuture(
+            ScraperJobResult.Success(
+                source = source,
+                duration = duration,
+                successfulUrls = successfulUrls
+            )
         )
     }
 

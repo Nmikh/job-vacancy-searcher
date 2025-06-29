@@ -38,7 +38,7 @@ class TestScrapperSuccessful(
     }
 
     override fun getVacancy(url: String, parameters: Map<String, List<String>>): Vacancy {
-        sleep(300)
+        sleep(30000)
 
         return Vacancy(
             id = UUID.randomUUID(),
@@ -69,7 +69,7 @@ class TestScrapperPartlyFailed(
     scraperJobProgressService: ScraperJobProgressService
 ) : AbstractVacancyScrapper(vacancyRepository, scraperJobProgressService) {
     override fun getVacancyLinks(parameters: Map<String, List<String>>): List<String> {
-        sleep(300)
+        sleep(30000)
 
         return listOf(
             "https://example.com/TestScrapperPartlyFailed/job1",
@@ -85,7 +85,7 @@ class TestScrapperPartlyFailed(
     }
 
     override fun getVacancy(url: String, parameters: Map<String, List<String>>): Vacancy {
-        sleep(300)
+        sleep(30000)
         if (
             url == "https://example.com/TestScrapperPartlyFailed/job1" ||
             url == "https://example.com/TestScrapperPartlyFailed/job3" ||
@@ -125,7 +125,7 @@ class TestScrapperFailed(
     scraperJobProgressService: ScraperJobProgressService
 ) : AbstractVacancyScrapper(vacancyRepository, scraperJobProgressService) {
     override fun getVacancyLinks(parameters: Map<String, List<String>>): List<String> {
-        sleep(300)
+        sleep(30000)
         throw Exception("TestScrapperFailed")
     }
 

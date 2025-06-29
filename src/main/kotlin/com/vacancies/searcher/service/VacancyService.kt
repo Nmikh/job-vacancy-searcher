@@ -33,6 +33,8 @@ class VacancyService(
                     .find { it.source == scrapper.getSource() }
                     ?.let { scrapper.scrapeVacancies(it.parameters, jobId) }
             }
+            .map { it.join() }
+
         scraperJob.status = ScraperJobStatus.FINISHED
         scraperJob.scrapingResults = results
 
