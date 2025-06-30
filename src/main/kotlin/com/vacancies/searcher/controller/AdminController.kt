@@ -45,6 +45,12 @@ class AdminController(
         return ResponseEntity.ok().build()
     }
 
+    @DeleteMapping("/vacancies/inactive")
+    fun removeInActiveVacancies(): ResponseEntity<Unit> {
+        vacancyRepository.deleteAllByActiveIsFalse()
+        return ResponseEntity.ok().build()
+    }
+
     @GetMapping("/vacancies/export", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun exportVacancies(): ResponseEntity<Resource> {
         val vacancies = vacancyRepository.findAll()

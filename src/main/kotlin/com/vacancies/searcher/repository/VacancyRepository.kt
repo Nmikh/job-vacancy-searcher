@@ -20,4 +20,6 @@ interface VacancyRepository : MongoRepository<Vacancy, UUID> {
     fun updateActiveStatus(urls: List<String>, active: Boolean)
 
     fun deleteAllBySourceIn(sources: List<VacancySource>)
+
+    fun deleteAllByActiveIsFalse()
 }
