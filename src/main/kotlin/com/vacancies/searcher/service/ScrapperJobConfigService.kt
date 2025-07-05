@@ -16,7 +16,7 @@ class ScrapperJobConfigService(
     @Cacheable("configurations")
     fun getConfigurations(): ScrapperConfig {
         val config = mapper.readValue(
-            ClassPathResource("job_scrapper_providers_configurations.json").file,
+            ClassPathResource("job_scrapper_providers_configurations.json").inputStream,
             ScrapperConfig::class.java
         )
         val availableScrapers = vacancyScrappers.map { it.getSource().toString() }
