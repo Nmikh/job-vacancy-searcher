@@ -2,8 +2,10 @@ package com.vacancies.searcher.controller
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.vacancies.searcher.model.ScraperJob
 import com.vacancies.searcher.model.Vacancy
 import com.vacancies.searcher.model.VacancySource
+import com.vacancies.searcher.model.dto.ScraperJobDto
 import com.vacancies.searcher.repository.ScraperJobRepository
 import com.vacancies.searcher.repository.VacancyRepository
 import org.springframework.core.io.ByteArrayResource
@@ -50,6 +52,12 @@ class AdminController(
         vacancyRepository.deleteAllByActiveIsFalse()
         return ResponseEntity.ok().build()
     }
+
+    @GetMapping("/jobs/latest")
+    fun getLatestJobStatus(): ResponseEntity<ScraperJob> =
+        jobRepository.findFirstByOrderByScrapingDateTimeDesc()
+            .map { ResponseEntity.ok(it) }
+            .orElse(ResponseEntity.notFound().build())
 
     @GetMapping("/vacancies/export", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun exportVacancies(): ResponseEntity<Resource> {
